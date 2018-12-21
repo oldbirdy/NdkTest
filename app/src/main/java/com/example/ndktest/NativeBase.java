@@ -5,6 +5,16 @@ package com.example.ndktest;
  */
 
 public class NativeBase {
+    public String hello = "hello";
+    public  static String world = "world";
+    private String logTag = "";
+
+
+    public String instanceMethod(String logTag){
+        this.logTag = logTag;
+        return logTag;
+    }
+
     //从jni获取字符串
     public native String helloWordFromJNI();
     //jni两个整数相加
