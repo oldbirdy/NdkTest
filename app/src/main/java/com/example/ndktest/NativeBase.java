@@ -1,5 +1,11 @@
 package com.example.ndktest;
 
+import android.content.Context;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.example.ndktest.ui.LableTextView;
+
 /**
  * Created by xulc on 2018/12/3.
  */
@@ -7,12 +13,24 @@ package com.example.ndktest;
 public class NativeBase {
     public String hello = "hello";
     public  static String world = "world";
-    private String logTag = "";
+    public String logTag = "JAVA中的值";
 
+
+    public static void staticMethod(LinearLayout ll_content,Context context,String result){
+        ll_content.addView(new LableTextView(context).setLableValue("调用java的静态方法:",result));
+    }
 
     public String instanceMethod(String logTag){
         this.logTag = logTag;
         return logTag;
+    }
+
+    public NativeBase(){
+
+    }
+
+    public NativeBase(Context context,String toast){
+        Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
     }
 
     //从jni获取字符串
@@ -30,7 +48,7 @@ public class NativeBase {
     //jni调用 实例方法
     public native void JNICallJAVAInstanceMethod();
     //jni调用 静态方法
-    public native void JNICallJAVAStaticMethod();
+    public native void JNICallJAVAStaticMethod(LinearLayout ll,Context context);
     //jni调用 构造方法
-    public native void  JNICallJAVAConstructorMethod();
+    public native void  JNICallJAVAConstructorMethod(Context context,String toast);
 }

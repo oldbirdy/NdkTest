@@ -146,20 +146,30 @@ Java_com_example_ndktest_NativeBase_JNIChangeStaticValue(JNIEnv *env, jobject in
 
 JNIEXPORT void JNICALL
 Java_com_example_ndktest_NativeBase_JNICallJAVAInstanceMethod(JNIEnv *env, jobject instance) {
-    // TODO
+    jclass cla = (*env)->GetObjectClass(env,instance);
+    jmethodID methid = (*env)->GetMethodID(env,cla,"instanceMethod","(Ljava/lang/String;)Ljava/lang/String;");
+    (*env)->CallObjectMethod(env,instance,methid,(*env)->NewStringUTF(env,"来自jni的值"));
+}
+
+JNIEXPORT void JNICALL
+Java_com_example_ndktest_NativeBase_JNICallJAVAStaticMethod(JNIEnv *env, jobject instance,
+                                                            jobject ll, jobject context) {
+    jclass cla = (*env)->GetObjectClass(env,instance);
+    //第四个参数是签名问题，签名问题。
+    jmethodID  jmethodID1 = (*env)->GetStaticMethodID(env,cla,"staticMethod","(Landroid/widget/LinearLayout;Landroid/content/Context;Ljava/lang/String;)V");
+    (*env)->CallStaticVoidMethod(env,cla,jmethodID1,ll,context,(*env)->NewStringUTF(env,"jni调用静态方法生成的一项"));
 
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_ndktest_NativeBase_JNICallJAVAStaticMethod(JNIEnv *env, jobject instance) {
-
-    // TODO
-
+Java_com_example_ndktest_NativeBase_JNICallJAVAConstructorMethod(JNIEnv *env, jobject instance,
+                                                                 jobject context, jstring toast_) {
+    jclass cla = (*env)->FindClass(env,"com/example/ndktest/NativeBase");
+//    jclass cla = (*env)->GetObjectClass(env,instance);
+    if(cla == NULL){
+        return;
+    }
+    jmethodID methodId = (*env)->GetMethodID(env,cla,"<init>","(Landroid/content/Context;Ljava/lang/String;)V");
+    (*env)->CallVoidMethod(env,instance,methodId,context,toast_);
 }
 
-JNIEXPORT void JNICALL
-Java_com_example_ndktest_NativeBase_JNICallJAVAConstructorMethod(JNIEnv *env, jobject instance) {
-
-    // TODO
-
-}

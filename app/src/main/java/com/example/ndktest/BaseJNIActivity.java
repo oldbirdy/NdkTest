@@ -42,9 +42,11 @@ public class BaseJNIActivity extends BaseActivity {
         ll_content.addView(new LableTextView(this).setLableValue("修改类的静态变量之前:",NativeBase.world));
         nativeBase.JNIChangeStaticValue();
         ll_content.addView(new LableTextView(this).setLableValue("修改类的静态变量之后:",NativeBase.world));
-        ll_content.addView(new LableTextView(this).setLableValue("调用java的实例方法之前:",NativeBase.world));
+        ll_content.addView(new LableTextView(this).setLableValue("调用java的实例方法之前:",nativeBase.logTag));
         nativeBase.JNICallJAVAInstanceMethod();
-        ll_content.addView(new LableTextView(this).setLableValue("调用java的实例方法之后:",NativeBase.world));
+        ll_content.addView(new LableTextView(this).setLableValue("调用java的实例方法之后:",nativeBase.logTag));
+        nativeBase.JNICallJAVAStaticMethod(ll_content,this);
+        nativeBase.JNICallJAVAConstructorMethod(this,"来自jni调用构造方法生成的context");
     }
 
     private String getIntArrayStr(int[] arr){

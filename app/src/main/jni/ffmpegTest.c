@@ -56,3 +56,4 @@ Java_com_example_ndktest_VedioUtils_decode(JNIEnv *env, jclass type, jstring inp
     (*env)->ReleaseStringUTFChars(env, inputStr_, inputStr);
     (*env)->ReleaseStringUTFChars(env, outputStr_, outputStr);
 }
+
