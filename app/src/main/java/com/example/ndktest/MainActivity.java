@@ -6,13 +6,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+import com.example.ndktest.base.BaseActivity;
+import com.example.ndktest.ffmpeg.FFmpegTest;
+
+public class MainActivity extends BaseActivity implements View.OnClickListener{
     private TextView tv1,tv2,tv3,tv4;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void setContentView() {
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void initView() {
         tv1 = findViewById(R.id.tv1);
         tv2 = findViewById(R.id.tv2);
         tv3 = findViewById(R.id.tv3);
@@ -32,6 +39,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(this,BaseJNIActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.tv2:
+                Intent intent1 = new Intent(this,FFmpegTest.class);
+                startActivity(intent1);
+                break;
+
+
         }
     }
 }

@@ -7,6 +7,7 @@
 #include <android/log.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <libavcodec/avcodec.h>
 
 #define LOGI(FORMAT,...) __android_log_print(ANDROID_LOG_INFO,"xulcjni",FORMAT,##__VA_ARGS__);
 #define LOGE(FORMAT,...) __android_log_print(ANDROID_LOG_ERROR,"xulcjni",FORMAT,##__VA_ARGS__);
@@ -171,5 +172,12 @@ Java_com_example_ndktest_NativeBase_JNICallJAVAConstructorMethod(JNIEnv *env, jo
     }
     jmethodID methodId = (*env)->GetMethodID(env,cla,"<init>","(Landroid/content/Context;Ljava/lang/String;)V");
     (*env)->CallVoidMethod(env,instance,methodId,context,toast_);
+}
+
+
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_testResult(JNIEnv *env, jclass type) {
+    const char *str = avcodec_configuration();
+    return (*env)->NewStringUTF(env, str);
 }
 

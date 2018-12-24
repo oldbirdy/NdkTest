@@ -5,5 +5,7 @@ package com.example.ndktest;
  */
 
 public class VedioUtils {
-    public native static void decode(String inputStr,String outputStr);
+
+    public native static String testResult();
+
 }
