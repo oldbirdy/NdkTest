@@ -6,6 +6,16 @@ package com.example.ndktest;
 
 public class VedioUtils {
 
-    public native static String testResult();
+    public native static String configuration();
+    //协议信息
+    public native static String urlProtocolInfo();
+    //avformat信息
+    public native static String avformatInfo();
+    //avcodec信息
+    public native static String avcodecInfo();
+    //avfilter信息  具体报错
+    public native static String avfilterInfo();
 
+    //视频转码
+    public native static String mp4Twmv(String inputStr,String outputStr);
 }

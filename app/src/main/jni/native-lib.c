@@ -8,6 +8,8 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavfilter/avfilter.h>
 
 #define LOGI(FORMAT,...) __android_log_print(ANDROID_LOG_INFO,"xulcjni",FORMAT,##__VA_ARGS__);
 #define LOGE(FORMAT,...) __android_log_print(ANDROID_LOG_ERROR,"xulcjni",FORMAT,##__VA_ARGS__);
@@ -175,9 +177,123 @@ Java_com_example_ndktest_NativeBase_JNICallJAVAConstructorMethod(JNIEnv *env, jo
 }
 
 
+
+
+//视频转码
+
+struct URLProtocol;
+
+
 JNIEXPORT jstring JNICALL
-Java_com_example_ndktest_VedioUtils_testResult(JNIEnv *env, jclass type) {
+Java_com_example_ndktest_VedioUtils_urlProtocolInfo(JNIEnv *env, jclass type) {
+
+    char info[40000]={0};
+    av_register_all();
+
+    struct URLProtocol *pup = NULL;
+    //Input
+    struct URLProtocol **p_temp = &pup;
+    avio_enum_protocols((void **)p_temp, 0);
+    while ((*p_temp) != NULL){
+        sprintf(info, "%s[In ][%10s]\n", info, avio_enum_protocols((void **)p_temp, 0));
+    }
+    pup = NULL;
+    //Output
+    avio_enum_protocols((void **)p_temp, 1);
+    while ((*p_temp) != NULL){
+        sprintf(info, "%s[Out][%10s]\n", info, avio_enum_protocols((void **)p_temp, 1));
+    }
+
+
+    return (*env)->NewStringUTF(env, info);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_avformatInfo(JNIEnv *env, jclass type) {
+    char info[40000] = { 0 };
+
+    av_register_all();
+
+    AVInputFormat *if_temp = av_iformat_next(NULL);
+    AVOutputFormat *of_temp = av_oformat_next(NULL);
+    //Input
+    while(if_temp!=NULL){
+        sprintf(info, "%s[In ][%10s]\n", info, if_temp->name);
+        if_temp=if_temp->next;
+    }
+    //Output
+    while (of_temp != NULL){
+        sprintf(info, "%s[Out][%10s]\n", info, of_temp->name);
+        of_temp = of_temp->next;
+    }
+    //LOGE("%s", info);
+    return (*env)->NewStringUTF(env, info);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_avcodecInfo(JNIEnv *env, jclass type) {
+
+    char info[40000] = { 0 };
+
+    av_register_all();
+
+    AVCodec *c_temp = av_codec_next(NULL);
+
+    while(c_temp!=NULL){
+        if (c_temp->decode!=NULL){
+            sprintf(info, "%s[Dec]", info);
+        }
+        else{
+            sprintf(info, "%s[Enc]", info);
+        }
+        switch (c_temp->type){
+            case AVMEDIA_TYPE_VIDEO:
+                sprintf(info, "%s[Video]", info);
+                break;
+            case AVMEDIA_TYPE_AUDIO:
+                sprintf(info, "%s[Audio]", info);
+                break;
+            default:
+                sprintf(info, "%s[Other]", info);
+                break;
+        }
+        sprintf(info, "%s[%10s]\n", info, c_temp->name);
+
+
+        c_temp=c_temp->next;
+    }
+
+
+    return (*env)->NewStringUTF(env, info);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_avfilterInfo(JNIEnv *env, jclass type) {
+    const char *str = "";
+    return (*env)->NewStringUTF(env, str);
+}
+
+
+//获取ffmpeg的avcodec的configuration信息
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_configuration(JNIEnv *env, jclass type) {
     const char *str = avcodec_configuration();
     return (*env)->NewStringUTF(env, str);
 }
 
+
+
+//视频转码 MP4转WMV
+JNIEXPORT jstring JNICALL
+Java_com_example_ndktest_VedioUtils_mp4Twmv(JNIEnv *env, jclass type, jstring inputStr_,
+                                            jstring outputStr_) {
+    const char *inputStr = (*env)->GetStringUTFChars(env, inputStr_, 0);
+    const char *outputStr = (*env)->GetStringUTFChars(env, outputStr_, 0);
+    avcodec_register_all();
+    // TODO
+
+    (*env)->ReleaseStringUTFChars(env, inputStr_, inputStr);
+    (*env)->ReleaseStringUTFChars(env, outputStr_, outputStr);
+
+    return (*env)->NewStringUTF(env, "");
+}

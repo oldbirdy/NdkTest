@@ -1,6 +1,6 @@
 package com.example.ndktest.ffmpeg;
 
-import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.ndktest.R;
@@ -12,7 +12,7 @@ import com.example.ndktest.base.BaseActivity;
  */
 
 public class FFmpegTest extends BaseActivity {
-
+    private TextView tv_test;
     @Override
     protected void setContentView() {
         setContentView(R.layout.activity_ffmpeg);
@@ -20,6 +20,36 @@ public class FFmpegTest extends BaseActivity {
 
     @Override
     protected void initView() {
-        ((TextView)findViewById(R.id.tv_test)).setText(VedioUtils.testResult());
+        tv_test = findViewById(R.id.tv_test);
+        findViewById(R.id.tv1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_test.setText(VedioUtils.configuration());
+            }
+        });
+        findViewById(R.id.tv2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_test.setText(VedioUtils.urlProtocolInfo());
+            }
+        });
+        findViewById(R.id.tv3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_test.setText(VedioUtils.avformatInfo());
+            }
+        });
+        findViewById(R.id.tv4).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_test.setText(VedioUtils.avcodecInfo());
+            }
+        });
+        findViewById(R.id.tv5).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tv_test.setText(VedioUtils.avfilterInfo());
+            }
+        });
     }
 }
