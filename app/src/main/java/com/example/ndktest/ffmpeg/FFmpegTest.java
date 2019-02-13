@@ -1,11 +1,20 @@
 package com.example.ndktest.ffmpeg;
 
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import com.example.ndktest.R;
 import com.example.ndktest.VedioUtils;
 import com.example.ndktest.base.BaseActivity;
+
+import java.io.File;
+
+import static com.example.ndktest.VedioUtils.mp4Twmv;
+import static com.example.ndktest.VedioUtils.mp4Tyuv;
 
 /**
  * Created by xulc on 2018/12/24.
@@ -49,6 +58,23 @@ public class FFmpegTest extends BaseActivity {
             @Override
             public void onClick(View v) {
                 tv_test.setText(VedioUtils.avfilterInfo());
+            }
+        });
+        findViewById(R.id.tv6).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
+                String outPutStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator +"aaa.yuv";
+                Log.i("xulc",Environment.getExternalStorageDirectory().getAbsolutePath());
+                Log.i("xulc",Environment.getRootDirectory().getAbsolutePath());
+                Log.i("xulc",Environment.getDataDirectory().getPath());
+                Log.i("xulc",Environment.getDownloadCacheDirectory().getPath());
+                Toast.makeText(FFmpegTest.this,mp4Tyuv(inputStr,outPutStr),Toast.LENGTH_LONG).show();
+
+//                String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
+//                String outPutStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator +"aaa.wmv";
+//                mp4Twmv(inputStr,outPutStr);
+
             }
         });
     }
