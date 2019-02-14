@@ -1,7 +1,10 @@
 package com.example.ndktest.ffmpeg;
 
+import android.graphics.PixelFormat;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +25,7 @@ import static com.example.ndktest.VedioUtils.mp4Tyuv;
 
 public class FFmpegTest extends BaseActivity {
     private TextView tv_test;
+    private SurfaceView sfv;
     @Override
     protected void setContentView() {
         setContentView(R.layout.activity_ffmpeg);
@@ -30,6 +34,7 @@ public class FFmpegTest extends BaseActivity {
     @Override
     protected void initView() {
         tv_test = findViewById(R.id.tv_test);
+        sfv = findViewById(R.id.sfv);
         findViewById(R.id.tv1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +79,22 @@ public class FFmpegTest extends BaseActivity {
 //                String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
 //                String outPutStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator +"aaa.wmv";
 //                mp4Twmv(inputStr,outPutStr);
+
+            }
+        });
+
+        sfv.getHolder().setFormat(PixelFormat.RGBA_8888);
+        final Surface surface = sfv.getHolder().getSurface();
+        findViewById(R.id.tv7).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
+                        VedioUtils.playVedio(inputStr,surface);
+                    }
+                }).start();
 
             }
         });

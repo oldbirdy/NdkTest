@@ -12,6 +12,9 @@
 #include <libavfilter/avfilter.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#include <unistd.h>
+#include <android/native_window.h>
+#include<android/native_window_jni.h>
 
 #define LOGI(FORMAT,...) __android_log_print(ANDROID_LOG_INFO,"xulcjni",FORMAT,##__VA_ARGS__);
 #define LOGE(FORMAT,...) __android_log_print(ANDROID_LOG_ERROR,"xulcjni",FORMAT,##__VA_ARGS__);
@@ -605,6 +608,70 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
     if(audioIndex == -1){
         LOGE("%s","音频找不到");
         return "";
+    }
+
+    //找到视频后
+    // 获取解码器上下文
+    AVCodecContext* pCodeCtx= pFormatCtx->streams[vedioIndex]->codec;
+    //获取解码器
+    AVCodec *pCode = avcodec_find_decoder(pCodeCtx->codec_id);
+    //打开解码器
+    if(avcodec_open2(pCodeCtx,pCode,NULL) < 0){
+        LOGE("%s","解码器打开失败");
+        return "";
+    }
+    //AVPacket存放的是 压缩数据
+    AVPacket* packet = (AVPacket*)av_malloc(sizeof(AVPacket));
+    av_init_packet(packet);
+
+    AVFrame* avFrame = av_frame_alloc();  //存放原始数据的frame
+    AVFrame* rgb_Frame = av_frame_alloc();  //存放解码之后的数据frame
+
+    uint8_t *out_buffer = (uint8_t *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGBA,pCodeCtx->height,pCodeCtx->width,1));
+    //赋值数据到 rgb_frame
+    av_image_fill_arrays(rgb_Frame->data,rgb_Frame->linesize,out_buffer,AV_PIX_FMT_RGBA,pCodeCtx->height,pCodeCtx->width,1);
+
+    int gotpicture;
+    int ret;
+    struct SwsContext *swsContext = sws_getContext(pCodeCtx->width,pCodeCtx->height,pCodeCtx->pix_fmt,pCodeCtx->width,pCodeCtx->height,AV_PIX_FMT_RGBA,SWS_BICUBIC, NULL, NULL, NULL);
+    ANativeWindow *nativeWindow = ANativeWindow_fromSurface(env,surface);
+    if(nativeWindow == 0){
+        LOGE("%s","window获取失败");
+        return "";
+    }
+    ANativeWindow_Buffer aNativeWindow_buffer;
+    while(av_read_frame(pFormatCtx,packet) >= 0){
+        if(packet->stream_index == vedioIndex){
+            //如果是视频流
+            ret = avcodec_decode_video2(pCodeCtx,avFrame,&gotpicture,packet);
+            if(ret < 0){
+                LOGE("Decode Error.\n");
+                return -1;
+            }
+            if(gotpicture){ //如果存在帧
+                sws_scale(swsContext,avFrame->data,avFrame->linesize,0,pCodeCtx->height,rgb_Frame->data,rgb_Frame->linesize);
+                ANativeWindow_setBuffersGeometry(nativeWindow,pCodeCtx->width,pCodeCtx->height,WINDOW_FORMAT_RGBA_8888);
+                ANativeWindow_lock(nativeWindow,&aNativeWindow_buffer,NULL);
+
+                uint8_t *dst= (uint8_t *) aNativeWindow_buffer.bits;
+//            拿到一行有多少个字节 RGBA
+                int destStride=aNativeWindow_buffer.stride*4;
+                //像素数据的首地址
+                uint8_t * src=  rgb_Frame->data[0];
+//            实际内存一行数量
+                int srcStride = rgb_Frame->linesize[0];
+                //int i=0;
+                for (int i = 0; i < pCodeCtx->height; ++i) {
+//                memcpy(void *dest, const void *src, size_t n)
+                    //将rgb_frame中每一行的数据复制给nativewindow
+                    memcpy(dst + i * destStride,  src + i * srcStride, srcStride);
+                }
+//解锁
+                ANativeWindow_unlockAndPost(nativeWindow);
+                usleep(1000 * 16);
+            }
+        }
+        av_free_packet(packet);
     }
 
 
