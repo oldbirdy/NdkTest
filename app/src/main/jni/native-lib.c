@@ -13,8 +13,8 @@
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 #include <unistd.h>
+#include <android/native_window_jni.h>
 #include <android/native_window.h>
-#include<android/native_window_jni.h>
 
 #define LOGI(FORMAT,...) __android_log_print(ANDROID_LOG_INFO,"xulcjni",FORMAT,##__VA_ARGS__);
 #define LOGE(FORMAT,...) __android_log_print(ANDROID_LOG_ERROR,"xulcjni",FORMAT,##__VA_ARGS__);
@@ -575,7 +575,17 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
                                               jobject surface) {
     const char *inputStr = (*env)->GetStringUTFChars(env, inputStr_, 0);
 
+
+    ANativeWindow* nativeWindow = ANativeWindow_fromSurface(env,surface);
+    if(nativeWindow == 0){
+        LOGE("%s","window获取失败");
+        return "";
+    }
+
     av_register_all();
+
+    ANativeWindow_Buffer aNativeWindow_buffer;
+
     AVFormatContext* pFormatCtx = avformat_alloc_context();
     LOGI("%s","流的个数为" + pFormatCtx->nb_streams);
     if(avformat_open_input(&pFormatCtx,inputStr,NULL,NULL)!=0){
@@ -634,12 +644,8 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
     int gotpicture;
     int ret;
     struct SwsContext *swsContext = sws_getContext(pCodeCtx->width,pCodeCtx->height,pCodeCtx->pix_fmt,pCodeCtx->width,pCodeCtx->height,AV_PIX_FMT_RGBA,SWS_BICUBIC, NULL, NULL, NULL);
-    ANativeWindow *nativeWindow = ANativeWindow_fromSurface(env,surface);
-    if(nativeWindow == 0){
-        LOGE("%s","window获取失败");
-        return "";
-    }
-    ANativeWindow_Buffer aNativeWindow_buffer;
+
+
     while(av_read_frame(pFormatCtx,packet) >= 0){
         if(packet->stream_index == vedioIndex){
             //如果是视频流
@@ -655,7 +661,7 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
 
                 uint8_t *dst= (uint8_t *) aNativeWindow_buffer.bits;
 //            拿到一行有多少个字节 RGBA
-                int destStride=aNativeWindow_buffer.stride*4;
+                int destStride = aNativeWindow_buffer.stride*4;
                 //像素数据的首地址
                 uint8_t * src=  rgb_Frame->data[0];
 //            实际内存一行数量
@@ -673,6 +679,12 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
         }
         av_free_packet(packet);
     }
+    //释放
+    ANativeWindow_release(nativeWindow);
+    av_frame_free(&avFrame);
+    av_frame_free(&rgb_Frame);
+    avcodec_close(pCodeCtx);
+    avformat_free_context(pFormatCtx);
 
 
     (*env)->ReleaseStringUTFChars(env, inputStr_, inputStr);

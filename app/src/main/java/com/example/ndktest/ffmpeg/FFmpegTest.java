@@ -16,7 +16,6 @@ import com.example.ndktest.base.BaseActivity;
 
 import java.io.File;
 
-import static com.example.ndktest.VedioUtils.mp4Twmv;
 import static com.example.ndktest.VedioUtils.mp4Tyuv;
 
 /**
@@ -24,7 +23,7 @@ import static com.example.ndktest.VedioUtils.mp4Tyuv;
  */
 
 public class FFmpegTest extends BaseActivity {
-    private TextView tv_test;
+    private TextView tvTest;
     private SurfaceView sfv;
     @Override
     protected void setContentView() {
@@ -33,36 +32,36 @@ public class FFmpegTest extends BaseActivity {
 
     @Override
     protected void initView() {
-        tv_test = findViewById(R.id.tv_test);
+        tvTest = findViewById(R.id.tv_test);
         sfv = findViewById(R.id.sfv);
         findViewById(R.id.tv1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_test.setText(VedioUtils.configuration());
+                tvTest.setText(VedioUtils.configuration());
             }
         });
         findViewById(R.id.tv2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_test.setText(VedioUtils.urlProtocolInfo());
+                tvTest.setText(VedioUtils.urlProtocolInfo());
             }
         });
         findViewById(R.id.tv3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_test.setText(VedioUtils.avformatInfo());
+                tvTest.setText(VedioUtils.avformatInfo());
             }
         });
         findViewById(R.id.tv4).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_test.setText(VedioUtils.avcodecInfo());
+                tvTest.setText(VedioUtils.avcodecInfo());
             }
         });
         findViewById(R.id.tv5).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_test.setText(VedioUtils.avfilterInfo());
+                tvTest.setText(VedioUtils.avfilterInfo());
             }
         });
         findViewById(R.id.tv6).setOnClickListener(new View.OnClickListener() {
@@ -83,19 +82,13 @@ public class FFmpegTest extends BaseActivity {
             }
         });
 
-        sfv.getHolder().setFormat(PixelFormat.RGBA_8888);
-        final Surface surface = sfv.getHolder().getSurface();
         findViewById(R.id.tv7).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
-                        VedioUtils.playVedio(inputStr,surface);
-                    }
-                }).start();
-
+                sfv.setVisibility(View.VISIBLE);
+                String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
+                Surface surface = sfv.getHolder().getSurface();
+                VedioUtils.playVedio(inputStr,surface);
             }
         });
     }
