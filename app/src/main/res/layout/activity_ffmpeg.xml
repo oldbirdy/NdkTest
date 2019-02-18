@@ -68,6 +68,14 @@
                 android:text="播放视频"
                 />
 
+            <Button
+                android:id="@+id/tv8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="播放网络视频"
+                />
+
         </LinearLayout>
     </ScrollView>
 

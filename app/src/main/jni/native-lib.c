@@ -569,26 +569,27 @@ Java_com_example_ndktest_VedioUtils_mp4Tyuv(JNIEnv *env, jclass type, jstring in
 }
 
 
+
+
 //视频播放
 JNIEXPORT jstring JNICALL
 Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring inputStr_,
                                               jobject surface) {
-    const char *inputStr = (*env)->GetStringUTFChars(env, inputStr_, 0);
+    const char *playvedioStr = (*env)->GetStringUTFChars(env, inputStr_, 0);
 
-
+    av_register_all();
+    //从surface获取原生窗口
     ANativeWindow* nativeWindow = ANativeWindow_fromSurface(env,surface);
     if(nativeWindow == 0){
         LOGE("%s","window获取失败");
         return "";
     }
 
-    av_register_all();
-
     ANativeWindow_Buffer aNativeWindow_buffer;
-
+    //分配 音视频格式上下文
     AVFormatContext* pFormatCtx = avformat_alloc_context();
-    LOGI("%s","流的个数为" + pFormatCtx->nb_streams);
-    if(avformat_open_input(&pFormatCtx,inputStr,NULL,NULL)!=0){
+    //打开流文件 文件也是一种流，传文件路径即可
+    if(avformat_open_input(&pFormatCtx,playvedioStr,NULL,NULL)!=0){
         LOGI("%s","打不开当前流文件");
         return "";
     }
@@ -596,33 +597,22 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
         LOGI("%s","找不到当前格式或者索引");
         return "";
     }
-
     int vedioIndex = -1;
-    int audioIndex = -1;
     for (int i = 0; i < pFormatCtx->nb_streams; ++i) {
         if(pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO){   //视频
             vedioIndex = i;
             break;
         }
     }
+    LOGI("%s","流的个数为" + pFormatCtx->nb_streams);
     if(vedioIndex == -1){
         LOGE("%s","视频找不到");
-        return "";
-    }
-    for (int i = 0; i < pFormatCtx->nb_streams; ++i) {
-        if(pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO){   //音频
-            audioIndex = i;
-            break;
-        }
-    }
-    if(audioIndex == -1){
-        LOGE("%s","音频找不到");
         return "";
     }
 
     //找到视频后
     // 获取解码器上下文
-    AVCodecContext* pCodeCtx= pFormatCtx->streams[vedioIndex]->codec;
+    AVCodecContext* pCodeCtx = pFormatCtx->streams[vedioIndex]->codec;
     //获取解码器
     AVCodec *pCode = avcodec_find_decoder(pCodeCtx->codec_id);
     //打开解码器
@@ -636,10 +626,10 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
 
     AVFrame* avFrame = av_frame_alloc();  //存放原始数据的frame
     AVFrame* rgb_Frame = av_frame_alloc();  //存放解码之后的数据frame
-
-    uint8_t *out_buffer = (uint8_t *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGBA,pCodeCtx->height,pCodeCtx->width,1));
+    // av_image_get_buffer_size  获取的是 指定格式存储一张照片需要的大小
+    uint8_t *out_buffer = (uint8_t *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGBA,pCodeCtx->width,pCodeCtx->height,1));
     //赋值数据到 rgb_frame
-    av_image_fill_arrays(rgb_Frame->data,rgb_Frame->linesize,out_buffer,AV_PIX_FMT_RGBA,pCodeCtx->height,pCodeCtx->width,1);
+    av_image_fill_arrays(rgb_Frame->data,rgb_Frame->linesize,out_buffer,AV_PIX_FMT_RGBA,pCodeCtx->width,pCodeCtx->height,1);
 
     int gotpicture;
     int ret;
@@ -660,19 +650,19 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
                 ANativeWindow_lock(nativeWindow,&aNativeWindow_buffer,NULL);
 
                 uint8_t *dst= (uint8_t *) aNativeWindow_buffer.bits;
-//            拿到一行有多少个字节 RGBA
+                //拿到一行有多少个字节 RGBA
                 int destStride = aNativeWindow_buffer.stride*4;
                 //像素数据的首地址
                 uint8_t * src=  rgb_Frame->data[0];
-//            实际内存一行数量
+                //实际内存一行数量
                 int srcStride = rgb_Frame->linesize[0];
                 //int i=0;
                 for (int i = 0; i < pCodeCtx->height; ++i) {
-//                memcpy(void *dest, const void *src, size_t n)
+                    // memcpy(void *dest, const void *src, size_t n)
                     //将rgb_frame中每一行的数据复制给nativewindow
                     memcpy(dst + i * destStride,  src + i * srcStride, srcStride);
                 }
-//解锁
+                //解锁
                 ANativeWindow_unlockAndPost(nativeWindow);
                 usleep(1000 * 16);
             }
@@ -687,7 +677,7 @@ Java_com_example_ndktest_VedioUtils_playVedio(JNIEnv *env, jclass type, jstring 
     avformat_free_context(pFormatCtx);
 
 
-    (*env)->ReleaseStringUTFChars(env, inputStr_, inputStr);
+    (*env)->ReleaseStringUTFChars(env, inputStr_, playvedioStr);
 
     return (*env)->NewStringUTF(env, "");
 }

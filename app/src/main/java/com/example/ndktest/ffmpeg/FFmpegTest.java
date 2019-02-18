@@ -1,6 +1,6 @@
 package com.example.ndktest.ffmpeg;
 
-import android.graphics.PixelFormat;
+import android.Manifest;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Surface;
@@ -13,8 +13,11 @@ import android.widget.Toast;
 import com.example.ndktest.R;
 import com.example.ndktest.VedioUtils;
 import com.example.ndktest.base.BaseActivity;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.File;
+
+import io.reactivex.functions.Consumer;
 
 import static com.example.ndktest.VedioUtils.mp4Tyuv;
 
@@ -81,14 +84,38 @@ public class FFmpegTest extends BaseActivity {
 
             }
         });
+        final RxPermissions rxPermissions = new RxPermissions(this);
 
         findViewById(R.id.tv7).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sfv.setVisibility(View.VISIBLE);
-                String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
-                Surface surface = sfv.getHolder().getSurface();
-                VedioUtils.playVedio(inputStr,surface);
+
+                rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        String inputStr = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator + "tencent"+ File.separator +"MicroMsg"+ File.separator +"WeiXin"+ File.separator +"1549355818576.mp4";
+                        Log.i("xulc",inputStr);
+                        Surface surface = sfv.getHolder().getSurface();
+                        VedioUtils.playVedio(inputStr,surface);
+                    }
+                });
+
+            }
+        });
+
+        findViewById(R.id.tv8).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rxPermissions.request(Manifest.permission.INTERNET).subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        String inputStr = "rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov";
+                        Log.i("xulc",inputStr);
+                        Surface surface = sfv.getHolder().getSurface();
+                        VedioUtils.playVedio(inputStr,surface);
+                    }
+                });
             }
         });
     }
